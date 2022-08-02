@@ -4,9 +4,9 @@ const mysql = require("mysql2");
 const inquirer = require("inquirer");
 
 // Create connection to database
-const connection = mysql.createConnection({
+const db = mysql.createConnection({
     host: "localhost",
-    port: 3001,
+    port: 3306,
     user: "root",
     password: "Haynes91!",
     database: "employee_tracker_db"
@@ -24,19 +24,34 @@ function menu() {
 
 // switch statement used to cycle through reponses based on user selection 
 .then((res) => {
-    switch (res.Menu) {
+    switch (res.menu) {
         case 'View All Employees':
             viewEmployees();
             break;   
         case "View all departments":
-            viewDepts();
+            viewDepartments();
             break;
-
-
-
-
-
-    };
+        case "View all roles":
+            viewRoles();
+            break;
+        case "Add a department":
+            addDept();
+            break;
+        case "Add a role":
+            addRole();
+            break;
+        case "Add an employee":
+            addEmployee();
+            break;
+        case "Update employee role":
+            update();
+            break;
+        case "Exit":
+            db.end();
+            break;
+    }
+});
+};
 
 
 
@@ -44,16 +59,16 @@ function menu() {
 
  // function to View all employees
 function viewEmployees() {
-    connection.query("SELECT * FROM employee", (err, data) => {
+    db.query("SELECT * FROM employee", (err, data) => {
         if (err) throw err;
         console.log("Displaying all employees:");
         console.table(data);
         start();
     });
 }
-
-function viewDepts() {
-    connection.query("SELECT * FROM department", (err, data) => {
+ // function to View all departments
+function viewDepartments() {
+    db.query("SELECT * FROM department", (err, data) => {
         if (err) throw err;
         console.log("Displaying all departments:");
         console.table(data);
