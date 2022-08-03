@@ -3,6 +3,7 @@
 const mysql = require("mysql2");
 const inquirer = require("inquirer");
 
+
 // Create connection to database
 const db = mysql.createConnection({
     host: "localhost",
@@ -73,9 +74,9 @@ function viewDepartments() {
 }
 // function to view 
 function viewRoles() {
-    connection.query("SELECT * FROM employee", (err, data) => {
+    db.query("SELECT * FROM role", (err, data) => {
         if (err) throw err;
-        console.log("Displaying all employees:");
+        console.log("Displaying all roles:");
         console.table(data);
         menu();
     });
@@ -141,3 +142,5 @@ function addRole() {
         });
     };
 })};
+
+menu();
