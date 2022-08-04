@@ -2,6 +2,7 @@
 // Require needed packages 
 const mysql = require("mysql2");
 const inquirer = require("inquirer");
+const cTable = require("console.table");
 
 
 // Create connection to database
@@ -26,7 +27,7 @@ function menu() {
 // switch statement used to cycle through reponses based on user selection 
 .then((res) => {
     switch (res.menu) {
-        case 'View All Employees':
+        case 'View all employees':
             viewEmployees();
             break;   
         case "View all departments":
@@ -82,13 +83,15 @@ function viewRoles() {
     });
 }
 // function to add department 
-function addDepartment() {
+function addDepartment(req,answer) {
+    
     inquirer.prompt([ // prompt user to input data
     {name: "department",
     type: "input",
     message: "What would you like to name the department?",
     },
    ]).then(answer => { // Once we have recieved the required data THEN run query on database
+    const name =[answer.department];
         db.query("INSERT INTO department (name) VALUES ( ? )",
         {name: answer.department},
         (err) => {
@@ -101,8 +104,6 @@ function addDepartment() {
 }
 function addRole() {
     db.query("SELECT * FROM department", function (err, answer) {
-        if (err) {
-    console.log(err);
     inquirer.prompt([
             {name: "title",
             type: "input",
@@ -112,13 +113,12 @@ function addRole() {
             type: "input",
             message: "What is this new role's salary",
             },
-            {
-            name: "department",
-            type: "list",
+            {name: "department",
+            type: "rawlist",
             choices: function() {
                 let choiceArray = [];
-                for (let i = 0; i < results.length; i++) {
-                    choiceArray.push(results[i].name);
+                for (let i = 0; i < answer.length; i++) {
+                    choiceArray.push(answer[i].name);
                 }
                 return choiceArray;
             },
@@ -126,12 +126,12 @@ function addRole() {
             }
      ]).then(answer => {
             let selectedDepartment;
-            for (let i = 0; i < results.length; i++) {
-                if (results[i].name === answer.department) {
-                    selectedDepartment = results[i];
+            for (let i = 0; i < answer.length; i++) {
+                if (answer[i].name === answer.department) {
+                    selectedDepartment = answer[i];
                 }
             }
-            db.query("INSERT INTO role SET ?",
+            db.query("INSERT INTO role (title, salary, department_id) VALUES ( ?,?,? )",
                 {title: answer.title, salary: answer.salary, department_id: selectedDepartment.id},
                 (err) => {
                     if (err) throw err;
@@ -140,7 +140,7 @@ function addRole() {
                 }
             )
         });
-    };
-})};
+    });
+};
 
 menu();
