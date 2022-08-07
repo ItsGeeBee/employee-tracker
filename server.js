@@ -91,7 +91,7 @@ function viewRoles() {
     });
 }
 // function to add department 
-function addDepartment(req, answer) {
+function addDepartment() {
 
     inquirer.prompt([ // prompt user to input data
         {
@@ -100,13 +100,12 @@ function addDepartment(req, answer) {
             message: "What would you like to name the department?",
         },
     ]).then(answer => { // Once we have recieved the required data THEN run query on database
-        const name = [answer.department];
-        db.query("INSERT INTO department (name) VALUES ( ? )",
+        db.query("INSERT INTO department SET ?",
             { name: answer.department },
             (err) => {
                 if (err) throw err;
-                console.log(`New department ${answer.department} has been added!`);
-                menu()
+            console.log(`New department ${answer.department} has been added!`);
+            menu()
             }
         );
     });
@@ -143,11 +142,11 @@ function addRole() {
                     selectedDepartment = answer[i];
                 }
             }
-            db.query("INSERT INTO role (title, salary, department_id) VALUES ( ?,?,? )",
-                {title: answer.title, salary: answer.salary, department_id: selectedDepartment.id},
+            db.query("INSERT INTO role SET ?",
+                {title: response.title, salary: response.salary, department_id: selectedDepartment.id},
                 (err) => {
                     if (err) throw err;
-                    console.log(`New role ${answer.title} has been added!`);
+                    console.log(`New role ${response.title} has been added!`);
                     menu();
                 }
             )
