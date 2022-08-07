@@ -23,11 +23,6 @@ function menu() {
         choices: ["View all departments", "View all roles", "View all employees", "Add a department",
             "Add a role", "Add an employee", "Update employee role", "Exit"]
     })
-
-        // switch statement used to cycle through reponses based on user selection 
-// switch statement used to cycle through reponses based on user selection 
-        // switch statement used to cycle through reponses based on user selection 
-// switch statement used to cycle through reponses based on user selection 
         // switch statement used to cycle through reponses based on user selection 
         .then((res) => {
             switch (res.menu) {
@@ -154,4 +149,26 @@ function addRole() {
     });
 };
 
+function update() {
+    connection.query("SELECT * FROM employee, role", (err, results) => {
+        if (err) throw err;
+
+        inquirer.prompt([
+            {name: "employee",
+             type: "rawlist",
+
+            choices: () => {
+             let choiceArray = [];
+             for (let i = 0; i < results.length; i++) {
+             choiceArray.push(results[i].last_name);
+                    }
+                },
+                message: "Which employee would you like to update?"
+            },
+            {
+                name: "role",
+                type: "rawlist",
+            }
+            ])}
+)}
 menu();
