@@ -89,10 +89,9 @@ function viewRoles() {
 function addDepartment() {
 
     inquirer.prompt([ // prompt user to input data
-        {
-            name: "department",
-            type: "input",
-            message: "What would you like to name the department?",
+        { name: "department",
+        type: "input",
+        message: "What would you like to name the department?",
         },
     ]).then(answer => { // Once we have recieved the required data THEN run query on database
         db.query("INSERT INTO department SET ?",
@@ -108,19 +107,16 @@ function addDepartment() {
 function addRole() {
     db.query("SELECT * FROM department", function (err, answer) {
         inquirer.prompt([
-            {
-                name: "title",
-                type: "input",
-                message: "What is the title for the new role?",
+            {name: "title",
+            type: "input",
+            message: "What is the title for the new role?",
             },
-            {
-                name: "salary",
-                type: "input",
-                message: "What is this new role's salary",
+            {name: "salary",
+            type: "input",
+            message: "What is this new role's salary",
             },
-            {
-                name: "department",
-                type: "rawlist",
+            {name: "department",
+            type: "rawlist",
                 choices: function () {
                     let choiceArray = [];
                     for (let i = 0; i < answer.length; i++) {
@@ -157,18 +153,35 @@ function update() {
             {name: "employee",
              type: "rawlist",
 
-            choices: () => {
-             let choiceArray = [];
-             for (let i = 0; i < results.length; i++) {
-             choiceArray.push(results[i].last_name);
-                    }
-                },
-                message: "Which employee would you like to update?"
-            },
+        choices: () => {
+            let choiceArray = [];
+            for (let i = 0; i < results.length; i++) {
+            choiceArray.push(results[i].last_name);
+            }},
+            message: "Which employee would you like to update?"},
             {
-                name: "role",
-                type: "rawlist",
-            }
-            ])}
+            name: "role",
+            type: "rawlist",
+            choices: () => {
+                let choiceArray = [];
+                for (let i = 0; i < results.length; i++) {
+                    choiceArray.push(results[i].title);
+                }},
+            message: "What is the employee's new role?"},
+            
+        ]).then(answer => {
+            let updatedEmployee;
+            let updatedRole;
+
+            for (let i = 0; i < results.length; i++) {
+            if (results[i].last_name === answer.employee) {
+                updatedEmployee = results[i];
+            }}
+            for (let i = 0; i < results.length; i++) {
+            if (results[i].title === answer.role) {
+                updatedRole = results[i];
+            }}
+
+            )}
 )}
 menu();
