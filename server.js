@@ -94,19 +94,19 @@ function addDepartment() {
         message: "What would you like to name the department?",
         },
     ]).then(answer => { // Once we have recieved the required data THEN run query on database
-        db.query("INSERT INTO department SET ?",
+        db.query("INSERT INTO department SET ?", // define which table to insert data - SET used as advised by BCS
             { name: answer.department },
-            (err) => {
+            (err) => { // if an error, throw error
                 if (err) throw err;
-            console.log(`New department ${answer.department} has been added!`);
-            menu()
+            console.log(`New department ${answer.department} has been added!`); // If no issue, console log added department 
+            menu() // Call back main menu inquirer prompt 
             }
         );
     });
 }
 function addRole() {
-    db.query("SELECT * FROM department", function (err, answer) {
-        inquirer.prompt([
+    db.query("SELECT * FROM department", function (err, answer) { // Select all departments in department table 
+        inquirer.prompt([ // inquirer to present user with a series of prompts
             {name: "title",
             type: "input",
             message: "What is the title for the new role?",
@@ -118,70 +118,71 @@ function addRole() {
             {name: "department",
             type: "rawlist",
                 choices: function () {
-                    let choiceArray = [];
+                    let choiceArray = []; // Push the user choices into an array
                     for (let i = 0; i < answer.length; i++) {
                         choiceArray.push(answer[i].name);
                     }
-                    return choiceArray;
+                    return choiceArray; // returns array of user choices 
                 },
                 message: "What department is this new role under?",
             }
         ]).then(response=> {
-            let selectedDepartment;
+            let selectedDepartment; 
             for (let i = 0; i < answer.length; i++) {
-                if (answer[i].name === response.department) {
-                    selectedDepartment = answer[i];
+                if (answer[i].name === response.department) { // if users answer is the same as department in table
+                    selectedDepartment = answer[i]; // Added value to varible 
                 }
             }
-            db.query("INSERT INTO role SET ?",
-                {title: response.title, salary: response.salary, department_id: selectedDepartment.id},
-                (err) => {
+            db.query("INSERT INTO role SET ?",  // define which table to insert data - SET used as advised by BCS
+                {title: response.title, salary: response.salary, department_id: selectedDepartment.id}, // Define what to add to table and where
+                (err) => {// if error throw error
                     if (err) throw err;
-                    console.log(`New role ${response.title} has been added!`);
+                    console.log(`New role ${response.title} has been added!`); // if all good console log the action has been successful
                     menu();
                 }
             )
         });
     });
 };
+const update = async () => { // changed to async function to utilize 'await'
+  
+    db.query('Select * FROM employee', async (err, employees) => {  // databse query to select all employees in table
+      if (err) throw err;
 
-function update() {
-    connection.query("SELECT * FROM employee, role", (err, results) => {
+      const employeeSelected = await // wait until prompt is complete before assigning user selection to variable 
+      inquirer.prompt([
+        {name: 'employee_id',
+        type: 'list',
+        choices: employees.map(employee => ({name:employee.first_name + " " + employee.last_name, value: employee.id})),// map through list of current employees
+        message: 'Which employee would you like to update? ',
+          }
+        ])
+      db.query('Select * FROM role', async (err, roles) => { // databse query to select all roles in table
         if (err) throw err;
-
+  
+        const roleSelected = await // wait until prompt is complete before assigning user selection to variable 
         inquirer.prompt([
-            {name: "employee",
-             type: "rawlist",
+            {name: 'role_id',
+            type: 'list',
+            choices: roles.map(role => ({name:role.title, value: role.id})),// map through list of current roles
+             message: 'What is their new role? ',
+            }
+          ])
+  
+        db.query('UPDATE employee_tracker_db.employee SET ? WHERE ?',  // define which table to UPDATE data - SET used as advised by BCS
+          [
+            {role_id: roleSelected.role_id, // Values in varibale to be added to role_id key in employee table 
+            },
+            {id: employeeSelected.employee_id, // Values in varibale to be added to employee_id key in employee table 
+            }],
+          (err) => {
+            if (err) throw err;
+            console.log('Employee role updated successfully!')// if all good console log the action has been successful
+            menu();
+          }
+        )
+      })
+    })
+  }
 
-        choices: () => {
-            let choiceArray = [];
-            for (let i = 0; i < results.length; i++) {
-            choiceArray.push(results[i].last_name);
-            }},
-            message: "Which employee would you like to update?"},
-            {
-            name: "role",
-            type: "rawlist",
-            choices: () => {
-                let choiceArray = [];
-                for (let i = 0; i < results.length; i++) {
-                    choiceArray.push(results[i].title);
-                }},
-            message: "What is the employee's new role?"},
-            
-        ]).then(answer => {
-            let updatedEmployee;
-            let updatedRole;
-
-            for (let i = 0; i < results.length; i++) {
-            if (results[i].last_name === answer.employee) {
-                updatedEmployee = results[i];
-            }}
-            for (let i = 0; i < results.length; i++) {
-            if (results[i].title === answer.role) {
-                updatedRole = results[i];
-            }}
-
-            )}
-)}
 menu();
