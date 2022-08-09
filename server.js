@@ -29,10 +29,6 @@ function menu() {
                 case 'View all employees':
                     viewEmployees();
                     break;
-            break;   
-                    break;
-            break;   
-                    break;
                 case "View all departments":
                     viewDepartments();
                     break;
@@ -61,7 +57,6 @@ function menu() {
 // function to view all employees
 function viewEmployees() {
     db.query("SELECT * FROM employee", (err, data) => {
-        if (err) throw err;
         console.log("Displaying all employees:");
         console.table(data);
         menu();
@@ -70,7 +65,6 @@ function viewEmployees() {
 // function to view all departments
 function viewDepartments() {
     db.query("SELECT * FROM department", (err, data) => {
-        if (err) throw err;
         console.log("Displaying all departments:");
         console.table(data);
         menu();
@@ -79,7 +73,6 @@ function viewDepartments() {
 // function to view 
 function viewRoles() {
     db.query("SELECT * FROM role", (err, data) => {
-        if (err) throw err;
         console.log("Displaying all roles:");
         console.table(data);
         menu();
@@ -144,6 +137,53 @@ function addRole() {
         });
     });
 };
+
+const addEmployee = async () => {  // changed to async function to utilize 'await'
+    db.query('Select * FROM role', async (err, roles) => { // databse query to select all roles in table
+        if (err) throw err; 
+    db.query('Select * FROM employee WHERE manager_id IS NULL', async (err, managers) => {
+        if (err) throw err; 
+        managers = managers.map(manager => ({ //map to loop through listed manangers in database 
+            name:manager.first_name + " " + manager.last_name, value: manager.id
+        }));
+        managers.push({name:"None"});
+
+ const responses = await inquirer // wait until prompt is complete before assigning user selection to variable
+        .prompt([
+          { type: "input",
+            message: "What is the employee's first name? ",
+            name: "first_name"
+          },
+          { type: "input",
+            message: "What is the employee's last name? ",
+            name: "last_name"
+          },
+          { type: "list",
+            message: "What is the employee's role? ",
+            choices: roles.map(role => ({ // map selection of roles
+                name:role.title, value: role.id
+            })),
+            name: "role_id"
+          },
+          { type: "list",
+            message: "Who is the employee's manager? ",
+            choices: managers,
+            name: "manager_id"
+          }
+        ]) 
+     db.query('INSERT INTO employee SET ?', // define which table to insert data - SET used as advised by BCS
+        { first_name: responses.first_name, last_name: responses.last_name, role_id: responses.role_id, manager_id: responses.manager_id
+        },
+        (err, res) => { // if error throw error 
+          if (err) throw err;
+          console.log("New employee added!");// if all good console log the action has been successful
+          menu();
+        })
+    })
+})
+}; 
+
+
 const update = async () => { // changed to async function to utilize 'await'
   
     db.query('Select * FROM employee', async (err, employees) => {  // databse query to select all employees in table
