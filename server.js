@@ -56,7 +56,7 @@ function menu() {
 
 // function to view all employees
 function viewEmployees() {
-    db.query("SELECT * FROM employee", (err, data) => {
+    db.query("SELECT * FROM employee,role", (err, data) => {
         console.log("Displaying all employees:");
         console.table(data);
         menu();
